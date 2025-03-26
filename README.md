@@ -1,1 +1,1 @@
-# lucky-naming-center-web
+# We make a name.
