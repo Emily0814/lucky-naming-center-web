@@ -1,0 +1,38 @@
+.nav-container {
+  background-color: white;
+  width: 100%;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  box-shadow: none !important;
+}
+
+.sticky {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000;
+}
+
+.nav-container .container {
+  max-width: 1140px;
+  padding: 10px 20px;
+}
+
+.nav-link {
+  color: black;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.nav-link:hover {
+  color: #555;
+}
+
+.nav-link.active {
+  font-weight: 700;
+}
+
+.nav-spacer {
+  display: none;
+}

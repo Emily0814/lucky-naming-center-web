@@ -1,0 +1,16 @@
+/* 웹 폰트 import (Google Fonts 사용 예시) */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
+
+header {
+  background-color: white;
+  width: 100%;
+  max-width: 1140px;
+  margin: 0 auto;
+  padding: 20px;
+  text-align: center;
+}
+
+.main-logo {
+  max-width: 200px;
+  height: auto;
+}

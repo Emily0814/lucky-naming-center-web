@@ -1,10 +1,14 @@
 <!DOCTYPE html>
-<html>
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
-<meta charset="UTF-8">
-<title>Insert title here</title>
 </head>
 <body>
-
+	<footer th:fragment="footer">
+        <div class="footer-line"></div>
+        <img src="/images/logo2.png" class="mini-logo">
+        <div class="contact">CONTACT</div>
+        <a href=""><img src="/images/githuib_logo.png" class="github"></a>
+        <div class="contact">developer: Hyemi Lee   email: ajaajashwaiting@gmail.com</div>
+    </footer>
 </body>
 </html>
