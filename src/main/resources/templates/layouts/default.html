@@ -10,12 +10,13 @@
     <link rel="stylesheet" href="/css/header.css">
     <link rel="stylesheet" href="/css/footer.css">
     <link rel="stylesheet" href="/css/nav.css">
+    <link rel="icon" href="/images/logo.png">
 </head>
 <body>
     <div class="main-wrapper">
         <!-- 헤더 포함 -->
         <div th:replace="~{fragments/header :: header}"></div>
-
+        
         <!-- 메인 콘텐츠 영역 -->
         <div class="container">
             <div layout:fragment="content"></div>

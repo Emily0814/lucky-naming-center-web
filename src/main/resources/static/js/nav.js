@@ -24,4 +24,15 @@ document.addEventListener('DOMContentLoaded', function() {
             
             //스크롤에 대한 이벤트 리스너를 추가
             window.addEventListener('scroll', handleScroll);
+			
+			//햄버거 메뉴 아이콘
+			  const menuIcon = document.getElementById(".menu-icon");
+			  const navItems = document.querySelector(".nav-items");
+			  if (menuIcon && navItems) {
+			    menuIcon.addEventListener("click", function () {
+			      console.log(".menu-icon clicked");
+			      navItems.classList.toggle("show");
+			    });
+			  }
+			
         });

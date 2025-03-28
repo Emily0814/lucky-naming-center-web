@@ -6,11 +6,12 @@ header {
   width: 100%;
   max-width: 1140px;
   margin: 0 auto;
-  padding: 20px;
+  padding: 40px 20px 20px 20px;
   text-align: center;
 }
 
 .main-logo {
   max-width: 200px;
   height: auto;
+  padding-bottom: 10px;
 }

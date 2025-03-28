@@ -1,0 +1,24 @@
+spring:
+  application:
+    name: naming-center
+  thymeleaf:
+    enabled: true
+    prefix: classpath:/templates/
+    suffix: .html
+  datasource:
+    driver-class-name: oracle.jdbc.OracleDriver
+    url: jdbc:oracle:thin:@localhost:1521:XEPDB1
+    username: namingcenter
+    password: java1234
+
+  jpa:
+    hibernate:
+      ddl-auto: update # 테이블 자동 생성 전략 (none, create, create-drop, update, validate)
+    show-sql: true # SQL 쿼리 로그 출력
+    properties:
+      hibernate:
+        "[format_sql]": true # SQL 쿼리 로그 포맷팅 
+        dialect: org.hibernate.dialect.Oracle12cDialect # Oracle 12c+ 방언
+file:
+  upload:
+     dir: src/main/resources/static/uploads

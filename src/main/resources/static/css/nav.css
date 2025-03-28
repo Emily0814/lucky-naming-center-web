@@ -3,7 +3,7 @@
   width: 100%;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
-  box-shadow: none !important;
+  box-shadow: none;
 }
 
 .sticky {
@@ -36,3 +36,63 @@
 .nav-spacer {
   display: none;
 }
+
+.menu-icon {
+    display: none;
+    cursor: pointer;
+    color: white;
+    font-size: 28px;
+}
+
+/* Existing mobile styles enhanced */
+@media screen and (max-width: 768px) {
+    /* Navigation adjustments */
+    nav {
+        flex-direction: row;
+        justify-content: space-between;
+        height: 64px;
+        padding: 0 15px;
+        position: relative;
+    }
+
+    /* 햄버거 메뉴 클릭 시 nav-items 표시 - 원래 코드와 일치하도록 유지 */
+    .nav-items {
+        display: none;
+        flex-direction: column;
+        width: 100%;
+        align-items: center;
+        background-color: black;
+        position: absolute;
+        top: 64px;
+        left: 0;
+        z-index: 100;
+        padding: 10px 0;
+    }
+
+    /* 이 클래스가 중요합니다 - 기존 JS 코드와 동작해야 함 */
+    .nav-items.show {
+        display: flex !important;
+    }
+
+    .nav-item {
+        padding: 12px 20px;
+        font-size: 16px;
+        width: 100%;
+        text-align: center;
+    }
+
+    /* 햄버거 메뉴 클릭 시 nav-item 중 | 구분자만 제거 */
+    .nav-items.show span.nav-item {
+        display: none;
+    }
+
+    /* 햄버거 아이콘 스타일링 */
+    .menu-icon {
+        display: block !important;
+        font-size: 24px;
+        cursor: pointer;
+        z-index: 200; /* 다른 요소 위에 표시 */
+    }
+
+}
+
