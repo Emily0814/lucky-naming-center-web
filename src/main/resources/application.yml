@@ -7,7 +7,7 @@ spring:
     suffix: .html
   datasource:
     driver-class-name: oracle.jdbc.OracleDriver
-    url: jdbc:oracle:thin:@localhost:1521:XEPDB1
+    url: jdbc:oracle:thin:@localhost:1521/XEPDB1
     username: namingcenter
     password: java1234
 
@@ -18,7 +18,7 @@ spring:
     properties:
       hibernate:
         "[format_sql]": true # SQL 쿼리 로그 포맷팅 
-        dialect: org.hibernate.dialect.Oracle12cDialect # Oracle 12c+ 방언
+        dialect: org.hibernate.dialect.OracleDialect # Oracle 12c+ 방언
 file:
   upload:
      dir: src/main/resources/static/uploads

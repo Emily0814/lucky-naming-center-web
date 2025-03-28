@@ -55,6 +55,7 @@ public class UserController {
 					userDTO.setProfileFile(profileFile);
 				} catch (Exception e) {
 					log.error("프로필 이미지 저장 중 오류: ", e);
+					userDTO.setProfile("images/default-profile.jpg");
 				}
 			} else {
 				userDTO.setProfile("images/default-profile.jpg");

@@ -62,16 +62,11 @@ public class UserService {
 		if (isEmailExists(userDTO.getEmail())) {
 			throw new RuntimeException("이미 사용중인 이메일입니다.");
 		}
+		//비밀번호 암호화
+		userDTO.setPassword(passwordEncoder.encode(userDTO.getPassword()));
 		
-		//DTO를 Entity로 변환
-		User user = User.builder()
-				.email(userDTO.getEmail())
-				.password(passwordEncoder.encode(userDTO.getPassword()))	//비밀번호 암호화
-				.nickname(userDTO.getNickname())
-				.profile(userDTO.getProfile())
-				.createdAt(userDTO.getCreatedAt())
-				.status(userDTO.getStatus())
-				.build();
+		//DTO를 Entity로 변환 > 직접 빌드하지 않고 매퍼 사용
+		User user = userMapper.toEntity(userDTO);
 				
 		//저장 및 반환
 		return userRepository.save(user);

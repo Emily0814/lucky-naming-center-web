@@ -29,7 +29,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "USER")
+@Table(name = "USERINFO")
 @SequenceGenerator(
 	    name = "USER_SEQ_GENERATOR",  // JPA에서 사용할 시퀀스 이름 (아무거나 가능)
 	    sequenceName = "USER_SEQ",  // 실제 DB에 생성된 시퀀스 이름

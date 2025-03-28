@@ -34,5 +34,25 @@ document.addEventListener('DOMContentLoaded', function() {
 			      navItems.classList.toggle("show");
 			    });
 			  }
+
+			//회원가입 폼 불러오기
+			  const signupNav = document.getElementById("signup-nav");
+
+			  if (signupNav) {
+			    signupNav.addEventListener("click", function (event) {
+			       event.preventDefault(); // 기본 링크 이동 방지
+
+			       fetch("/signup") // 서버에서 회원가입 폼을 가져옴
+			       .then(response => response.text())
+			       .then(html => {
+			       		document.getElementById("main-content").innerHTML = html;
+			       })
+			       .catch(error => console.error("회원가입 페이지를 불러오는 데 실패했습니다.", error));
+			       });
+			  }
 			
+			  			
         });
+		
+
+
