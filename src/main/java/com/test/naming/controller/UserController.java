@@ -32,6 +32,7 @@ public class UserController {
 	
 	@GetMapping("/signup")
 	public String signup(Model model) {
+		model.addAttribute("pageName", "signup"); // signup.html에 적용될 CSS 파일명
 		model.addAttribute("userDTO", new UserDTO());
 		return "user/signup";
 	}
@@ -79,6 +80,8 @@ public class UserController {
 	
 	@GetMapping("/login")
 	public String login(Model model) {
+		model.addAttribute("pageName", "login"); // login.html에 적용될 CSS 파일명
+		
 		return "user/login";
 	}
 	
@@ -92,7 +95,7 @@ public class UserController {
 	
 	@GetMapping("/mypage")
 	public String mypage(Model model) {
-		
+		model.addAttribute("pageName", "mypage"); // mypage.html에 적용될 CSS 파일명
 		//여기에 넣어야 함
 		
 		return "user/mypage";
