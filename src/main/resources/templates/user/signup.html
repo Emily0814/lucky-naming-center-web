@@ -1,30 +1,38 @@
 <!DOCTYPE html>
-<html lang="en">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
-	<div layout:fragment="content">
-		<div>
-		    <h2>회원가입</h2>
-		    <form id="signupForm" method="POST" enctype="multipart/form-data">
-		        <div class="form-group">
-		            <label>이메일*</label>
-		            <input type="email" id="userEmail" name="email" class="form-control" required>
-		        </div>
-		        <div class="form-group">
-		            <label>비밀번호*</label>
-		            <input type="password" id="userPassword" name="password" class="form-control" required>
-		        </div>
-		        <div class="form-group">
-		            <label>비밀번호 확인*</label>
-		            <input type="password" id="confirmPassword" name="confirmPassword" class="form-control" required>
-		        </div>
-		        <button type="submit" class="btn btn-primary">가입하기</button>
-		    </form>
-		</div>
-		
+    <!-- 회원가입 모달 - ID와 fragment 이름 맞추기 -->
+    <div th:fragment="signup-modal" class="modal fade" id="signup-modal" tabindex="-1" aria-labelledby="signupModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="signupModalLabel">회원가입</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="signupForm" method="POST" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label for="userEmail" class="form-label">이메일*</label>
+                            <input type="email" class="form-control" id="userEmail" name="email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="userPassword" class="form-label">비밀번호*</label>
+                            <input type="password" class="form-control" id="userPassword" name="password" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="confirmPassword" class="form-label">비밀번호 확인*</label>
+                            <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <button type="submit" class="btn btn-primary">가입하기</button>
+                            <button type="button" class="btn btn-link" id="showLoginModal">로그인</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
 </body>
 </html>

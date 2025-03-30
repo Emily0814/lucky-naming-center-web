@@ -1,0 +1,56 @@
+/* /css/modal.css */
+.modal-header {
+  border-bottom: 1px solid #e9ecef;
+  background-color: #f8f9fa;
+}
+
+.modal-title {
+  font-weight: 600;
+  color: #333;
+}
+
+.modal-body {
+  padding: 2rem;
+}
+
+.modal .btn-primary {
+  background-color: #4a6fa5;
+  border-color: #4a6fa5;
+  transition: all 0.3s ease;
+}
+
+.modal .btn-primary:hover {
+  background-color: #3a5a8a;
+  border-color: #3a5a8a;
+}
+
+.modal .btn-link {
+  color: #4a6fa5;
+  text-decoration: none;
+}
+
+.modal .btn-link:hover {
+  color: #3a5a8a;
+  text-decoration: underline;
+}
+
+.modal input.form-control:focus {
+  border-color: #4a6fa5;
+  box-shadow: 0 0 0 0.2rem rgba(74, 111, 165, 0.25);
+}
+
+.modal-backdrop {
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+/* 모바일 대응 */
+@media (max-width: 576px) {
+  .modal-dialog {
+    margin: 0.5rem;
+    max-width: calc(100% - 1rem);
+  }
+  
+  .modal-body {
+    padding: 1rem;
+  }
+}
