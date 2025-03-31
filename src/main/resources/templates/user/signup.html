@@ -8,26 +8,56 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
+                    <div class="logo-container">
+        				<img alt="mini-logo" src="/images/logo2.png" class="mini-logo" id="login-logo">
+    				</div>
                     <h5 class="modal-title" id="signupModalLabel">회원가입</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <form id="signupForm" method="POST" enctype="multipart/form-data">
-                        <div class="mb-3">
-                            <label for="userEmail" class="form-label">이메일*</label>
-                            <input type="email" class="form-control" id="userEmail" name="email" required>
+                        <div class="mb-3" id="profile-container">
+                            <label for="confirm-profile" class="form-label">프로필</label>
+                            <!-- 원형 아이콘을 클릭해서 파일 업로드 -->
+                            <div class="profile-upload-container">
+                            	<input type="file" id="confirm-profile" name="confirm-profile" class="file-input" accept="image/*">
+                            	<label for="confirm-profile" class="profile-upload-label">
+                            		<img src="/images/default-profile.svg" alt="프로필" class="profile-image" id="profile-image">
+                            	</label>
+                            </div>
+                        </div>
+                        <div class="mb-3"> <!-- 중복확인 -->
+                            <label for="userEmail" class="form-label">이메일*</label>	
+                            <div class="input-with-button">
+	                            <input type="email" class="form-control" id="userEmail" name="email" required>
+	                            <button type="button" class="btn-confirm" id="btn-email">중복확인</button>
+                            </div>
                         </div>
                         <div class="mb-3">
                             <label for="userPassword" class="form-label">비밀번호*</label>
-                            <input type="password" class="form-control" id="userPassword" name="password" required>
+							<div class="input-with-button">
+					    	<input type="password" class="form-control" id="userPassword" name="password" placeholder="8자 이상 영문 대소문자, 숫자, 특수문자를 조합" required>
+					    	<button type="button" class="btn-toggle-pw" id="toggle-password">
+					      		<i class="fa fa-eye" id="eye-icon"></i>
+					    	</button>
+					  	</div>
+					  	<div class="input-with-button mt-2">
+					    	<input type="password" class="form-control" id="confirmPassword" name="confirmPassword" placeholder="비밀번호 확인" required>
+					    	<button type="button" class="btn-toggle-pw" id="toggle-confirm-password">
+					      		<i class="fa fa-eye" id="eye-confirm-icon"></i>
+					    	</button>
+					  	</div>
                         </div>
-                        <div class="mb-3">
-                            <label for="confirmPassword" class="form-label">비밀번호 확인*</label>
-                            <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required>
+                        <div class="mb-3">	
+                            <label for="confirmPassword" class="form-label">닉네임</label>
+                            <div class="input-with-button">
+	                            <input type="text" class="form-control" id="nickname" name="nickname">
+	                            <button type="button" class="btn-confirm" id="btn-nickname">중복확인</button>
+                            </div>
                         </div>
+                        <!-- 생년월일,성별 추가하는게 나을 것 같지만 생략 -->
                         <div class="d-flex justify-content-between align-items-center">
                             <button type="submit" class="btn btn-primary">가입하기</button>
-                            <button type="button" class="btn btn-link" id="showLoginModal">로그인</button>
                         </div>
                     </form>
                 </div>

@@ -34,9 +34,13 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://kit.fontawesome.com/fac7e60736.js" crossorigin="anonymous"></script>
     <script src="/js/nav.js"></script>
     <script src="/js/modal.js"></script>
-    <script th:src="@{/js/{fileName}.js(fileName=${pageName} ?: 'empty')}"></script>
+    <script src="/js/signup.js"></script>
+    <script th:if="${pageName != null && pageName != 'login' && pageName != 'signup'}" 
+        th:src="@{/js/{fileName}.js(fileName=${pageName})}"></script>
+	<script th:if="${pageName == null}" src="/js/empty.js"></script>
     <!-- <script th:if="${pageName != null}" th:src="@{/js/{fileName}.js(fileName=${pageName})}"></script> -->
 </body>
 </html>

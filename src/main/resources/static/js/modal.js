@@ -1,12 +1,13 @@
 // modal.js - 모달 관련 JavaScript 코드
 document.addEventListener('DOMContentLoaded', function() {
-  // 모달 인스턴스 생성
+  // 모달 요소 찾기
   const loginModalEl = document.getElementById('login-modal');
   const signupModalEl = document.getElementById('signup-modal');
   
   // 모달이 없으면 함수 종료
   if (!loginModalEl || !signupModalEl) return;
   
+  // Bootstrap 모달 인스턴스 생성
   const loginModal = new bootstrap.Modal(loginModalEl);
   const signupModal = new bootstrap.Modal(signupModalEl);
   
@@ -21,6 +22,23 @@ document.addEventListener('DOMContentLoaded', function() {
     document.body.focus();
   });
   
+  // 네비게이션 링크 이벤트 리스너 추가 - 콘텐츠 유지를 위해
+  const signupNavLink = document.querySelector('a[data-bs-target="#signup-modal"]');
+  if (signupNavLink) {
+    signupNavLink.addEventListener('click', function(e) {
+      e.preventDefault(); // 기본 동작 방지 (페이지 이동 방지)
+      signupModal.show();
+    });
+  }
+  
+  const loginNavLink = document.querySelector('a[data-bs-target="#login-modal"]');
+  if (loginNavLink) {
+    loginNavLink.addEventListener('click', function(e) {
+      e.preventDefault(); // 기본 동작 방지 (페이지 이동 방지)
+      loginModal.show();
+    });
+  }
+  
   // 모달 간 전환 - 로그인 → 회원가입
   const showSignupModalBtn = document.getElementById('showSignupModal');
   if (showSignupModalBtn) {
@@ -29,7 +47,7 @@ document.addEventListener('DOMContentLoaded', function() {
       loginModal.hide();
       setTimeout(() => {
         signupModal.show();
-      }, 500);
+      }, 300);
     });
   }
   
@@ -41,7 +59,7 @@ document.addEventListener('DOMContentLoaded', function() {
       signupModal.hide();
       setTimeout(() => {
         loginModal.show();
-      }, 500);
+      }, 300);
     });
   }
   
@@ -51,8 +69,8 @@ document.addEventListener('DOMContentLoaded', function() {
     loginForm.addEventListener('submit', function(e) {
       e.preventDefault();
       // AJAX를 사용하여 로그인 처리
-      const email = document.getElementById('loginEmail').value;
-      const password = document.getElementById('loginPassword').value;
+      const email = document.getElementById('login-email').value;
+      const password = document.getElementById('login-password').value;
       
       // 여기에 로그인 로직 추가
       console.log('로그인 시도:', email);
@@ -65,7 +83,12 @@ document.addEventListener('DOMContentLoaded', function() {
         },
         body: JSON.stringify({ email, password }),
       })
-      .then(response => response.json())
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('네트워크 응답이 올바르지 않습니다');
+        }
+        return response.json();
+      })
       .then(data => {
         if (data.success) {
           window.location.reload();
@@ -98,26 +121,40 @@ document.addEventListener('DOMContentLoaded', function() {
       
       // AJAX를 사용하여 회원가입 처리
       const email = document.getElementById('userEmail').value;
+      // FormData 객체를 사용하여 multipart/form-data 형식으로 전송
+      const formData = new FormData();
+	  
+      formData.append('userDTO', JSON.stringify({ 
+        email: email, 
+        password: password 
+      }));
       
-      // 여기에 회원가입 로직 추가
+      // 실제 파일 업로드가 있다면 추가
+      const profileFile = document.getElementById('profile-file').files[0];
+      if (profileFile) {
+      	formData.append('profileFile', profileFile);
+      }
+      
       console.log('회원가입 시도:', email);
       
-      // 예시: 서버로 데이터 전송 (fetch API 사용)
+      // 서버로 FormData 전송
       fetch('/api/signup', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
+        body: formData, // Content-Type은 자동으로 설정됨
       })
-      .then(response => response.json())
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('네트워크 응답이 올바르지 않습니다');
+        }
+        return response.json();
+      })
       .then(data => {
         if (data.success) {
           alert('회원가입이 완료되었습니다. 로그인해주세요.');
           signupModal.hide();
           setTimeout(() => {
             loginModal.show();
-          }, 500);
+          }, 300);
         } else {
           alert('회원가입 실패: ' + data.message);
         }
@@ -129,7 +166,7 @@ document.addEventListener('DOMContentLoaded', function() {
         signupModal.hide();
         setTimeout(() => {
           loginModal.show();
-        }, 500);
+        }, 300);
       });
     });
   }
