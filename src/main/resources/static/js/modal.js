@@ -1,5 +1,22 @@
 // modal.js - 모달 관련 JavaScript 코드
 document.addEventListener('DOMContentLoaded', function() {
+  // URL 파라미터 확인
+  const urlParams = new URLSearchParams(window.location.search);
+  const error = urlParams.get('error');
+  const login = urlParams.get('login');
+  
+  // 로그인 실패 메시지 표시
+  if (error === 'true' && login === 'failed') {
+    alert('로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.');
+    // URL에서 파라미터 제거 (브라우저 히스토리 깔끔하게)
+    window.history.replaceState({}, document.title, '/');
+    
+    // 로그인 모달 표시
+    if (document.getElementById('login-modal')) {
+      const loginModal = new bootstrap.Modal(document.getElementById('login-modal'));
+      loginModal.show();
+    }
+  }
   // 모달 요소 찾기
   const loginModalEl = document.getElementById('login-modal');
   const signupModalEl = document.getElementById('signup-modal');
@@ -62,46 +79,22 @@ document.addEventListener('DOMContentLoaded', function() {
       }, 300);
     });
   }
-  
-  // 로그인 폼 제출 처리
+
+  // 로그인 폼이 제출되기 전에 리다이렉트 URL 설정
   const loginForm = document.getElementById('loginForm');
   if (loginForm) {
-    loginForm.addEventListener('submit', function(e) {
-      e.preventDefault();
-      // AJAX를 사용하여 로그인 처리
-      const email = document.getElementById('login-email').value;
-      const password = document.getElementById('login-password').value;
-      
-      // 여기에 로그인 로직 추가
-      console.log('로그인 시도:', email);
-      
-      // 예시: 서버로 데이터 전송 (fetch API 사용)
-      fetch('/api/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      })
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('네트워크 응답이 올바르지 않습니다');
-        }
-        return response.json();
-      })
-      .then(data => {
-        if (data.success) {
-          window.location.reload();
-        } else {
-          alert('로그인 실패: ' + data.message);
-        }
-      })
-      .catch(error => {
-        console.error('로그인 오류:', error);
-        // 실제 API가 없으므로 임시로 성공 처리하여 테스트
-        loginModal.hide();
-        alert('로그인 성공 (테스트)');
-      });
+    // 저장된 리다이렉트 URL이 있으면 사용
+    const redirectUrl = sessionStorage.getItem('redirectUrl');
+    const redirectInput = document.getElementById('redirect-param');
+    
+    if (redirectUrl && redirectInput) {
+      redirectInput.value = redirectUrl;
+    }
+    
+    // 기존 AJAX 로그인은 제거하고 폼이 직접 제출되도록 변경
+    // 세션 스토리지에서 리다이렉트 URL 삭제
+    loginForm.addEventListener('submit', function() {
+      sessionStorage.removeItem('redirectUrl');
     });
   }
   
@@ -174,6 +167,21 @@ document.addEventListener('DOMContentLoaded', function() {
       });
     });
   }
-     
   
+  // 프로필 이미지 미리보기 처리
+  const profileInput = document.getElementById('confirm-profile');
+  const profileImage = document.getElementById('profile-image');
+  
+  if (profileInput && profileImage) {
+    profileInput.addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          profileImage.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+  }
 });

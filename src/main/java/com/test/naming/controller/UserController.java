@@ -7,6 +7,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -126,36 +127,6 @@ public class UserController {
 		return "user/login";
 	}
 	
-	// API 엔드포인트 추가 - 로그인 처리
-	@PostMapping("/api/login")
-	@ResponseBody
-	public ResponseEntity<Map<String, Object>> processLogin(@RequestBody Map<String, String> loginData) {
-	    try {
-	        String email = loginData.get("email");
-	        String password = loginData.get("password");
-	        
-	        log.info("로그인 시도: {}", email);
-	        
-	        // 여기에 실제 로그인 로직을 구현하세요
-	        // 예: boolean isAuthenticated = userService.authenticate(email, password);
-	        
-	        // 임시 성공 응답 (실제 로직으로 대체해야 함)
-	        return ResponseEntity.ok(Map.of(
-	            "message", "로그인 성공",
-	            "success", true,
-	            "user", Map.of("email", email)
-	        ));
-	        
-	    } catch (Exception e) {
-	        log.error("로그인 처리 중 오류: ", e);
-	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-	                .body(Map.of(
-	                    "message", "로그인 중 오류가 발생했습니다: " + e.getMessage(),
-	                    "success", false
-	                ));
-	    }
-	}
-	
 	@GetMapping("/logout")
 	public String logout(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		
@@ -169,9 +140,20 @@ public class UserController {
 	}
 	
 	@GetMapping("/mypage")
-	public String mypage(Model model) {
+	public String mypage(Model model, Authentication authentication) {
 		model.addAttribute("pageName", "mypage"); // mypage.html에 적용될 CSS 파일명
-		//여기에 넣어야 함
+		
+		// 현재 인증된 사용자 정보 가져오기
+        if (authentication != null && authentication.isAuthenticated()) {
+            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+            String email = userDetails.getUsername(); // 이메일이 username으로 사용됨
+            
+            // 이메일로 사용자 정보 조회
+            UserDTO userDTO = userService.findUserByEmail(email);
+            if (userDTO != null) {
+                model.addAttribute("user", userDTO);
+            }
+        }
 		
 		return "user/mypage";
 	}
