@@ -66,7 +66,12 @@ public class User {	//사용자 정보를 저장(사용자 이름, 이메일, �
         joinColumns = @JoinColumn(name = "USER_ID"),
         inverseJoinColumns = @JoinColumn(name = "ROLE_ID")
     )
+    @Builder.Default
     private Set<Role> roles = new HashSet<>();
+    
+    public void setRoles(Set<Role> roles) {
+        this.roles = roles;
+    }
     
     // UserDTO 변환 메서드
     public UserDTO toDTO() {

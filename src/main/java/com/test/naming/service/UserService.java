@@ -57,6 +57,7 @@ public class UserService {
 	}
 
 	//회원가입(쓰기 작업)
+	@Transactional
 	public User registerUser(UserDTO userDTO) {
 		//이메일 중복 확인
 		if (isEmailExists(userDTO.getEmail())) {

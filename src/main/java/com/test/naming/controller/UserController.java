@@ -3,7 +3,11 @@ package com.test.naming.controller;
 import java.util.Map;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.test.naming.dto.UserDTO;
 import com.test.naming.entity.User;
 import com.test.naming.service.FileService;
@@ -30,6 +35,7 @@ public class UserController {
 	
 	private final UserService userService;
 	private final FileService fileService;
+	private final ObjectMapper objectMapper; // 주입 추가
 	
 	// 이 매핑은 유지하되, 실제로는 모달로 처리되기 때문에 직접 접근할 일은 없습니다.
 	// 모달 외부에서 회원가입 페이지를 직접 보여주고 싶다면 사용할 수 있습니다.
@@ -41,23 +47,37 @@ public class UserController {
 	}
 	
 	// API 엔드포인트로 변경 - 회원가입 처리
-	@PostMapping("/api/signup")
+	@PostMapping(value = "/api/signup", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
 	@ResponseBody
 	public ResponseEntity<Map<String, String>> processSignup(
-			@RequestPart(name = "userDTO") UserDTO userDTO,
-			@RequestPart(name = "profileFile",  required = false) MultipartFile profileFile) {
+			@RequestPart(value = "userDTO") String userDTOString,
+			@RequestPart(value = "profileFile", required = false) MultipartFile profileFile) {
 		
 		try {
+			// 문자열로 받은 JSON을 객체로 변환
+			UserDTO userDTO = objectMapper.readValue(userDTOString, UserDTO.class);
+			
 			log.info("회원가입 요청 데이터: {}", userDTO);
 			
+			// 이메일 중복 확인
+			if (userService.isEmailExists(userDTO.getEmail())) {
+				return ResponseEntity.badRequest()
+						.body(Map.of(
+							"message", "이미 등록된 이메일입니다.",
+							"success", "false"
+						));
+			}
+			
+			// 기본값 설정 (생성일시, 상태, 역할)
 			userDTO.setDefaultValues();
 			
-			//프로필 파일이 있는 경우 처리 - FileService 사용
+			// 프로필 파일이 있는 경우 처리 - FileService 사용
 			if (profileFile != null && !profileFile.isEmpty()) {
 				try {
-					//파일 처리 로직(파일 저장 등)
-					String savedFileName = fileService.saveProfileImage(profileFile);	//실제 저장 로직으로 대체
-					userDTO.setProfileFile(profileFile);
+					// 파일 저장 로직
+					String savedFileName = fileService.saveProfileImage(profileFile);
+					userDTO.setProfile(savedFileName);
+					log.info("프로필 이미지 저장됨: {}", savedFileName);
 				} catch (Exception e) {
 					log.error("프로필 이미지 저장 중 오류: ", e);
 					userDTO.setProfile("images/default-profile.jpg");
@@ -66,10 +86,11 @@ public class UserController {
 				userDTO.setProfile("images/default-profile.jpg");
 			}
 			
-			//사용자 서비스 호출 > 사용자 저장
+			// 사용자 서비스 호출 > 사용자 저장
 			User savedUser = userService.registerUser(userDTO);
+			log.info("회원가입 완료: {}", savedUser.getId());
 			
-			//성공 응답 반환
+			// 성공 응답 반환
 			return ResponseEntity.ok(Map.of(
 					"message", "회원가입이 완료되었습니다.",
 					"userId", savedUser.getId().toString(),
@@ -86,24 +107,21 @@ public class UserController {
 		}
 	}
 	
-	
-	
 	// 기존 회원가입 처리 엔드포인트 - 이전 버전과의 호환성을 위해 유지
 	// 새 코드에서는 /api/signup을 사용하세요
-	@PostMapping("/signok")
+	@PostMapping(value = "/signok", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
 	@ResponseBody
 	public ResponseEntity<Map<String, String>> signupok(
-			@RequestPart(name = "userDTO") UserDTO userDTO,
-			@RequestPart(name = "profileFile",  required = false) MultipartFile profileFile) {
+			@RequestPart(value = "userDTO") String userDTOString,
+			@RequestPart(value = "profileFile", required = false) MultipartFile profileFile) {
 		// /api/signup으로 요청 전달
-		return processSignup(userDTO, profileFile);
+		return processSignup(userDTOString, profileFile);
 	}
 	
 	// 이 매핑은 유지하되, 실제로는 모달로 처리되기 때문에 직접 접근할 일은 없습니다.
 	// 모달 외부에서 로그인 페이지를 직접 보여주고 싶다면 사용할 수 있습니다.
 	@GetMapping("/login-page")
 	public String loginPage(Model model) {
-		
 		model.addAttribute("pageName", "login"); // login.html에 적용될 CSS 파일명
 		return "user/login";
 	}
@@ -141,7 +159,11 @@ public class UserController {
 	@GetMapping("/logout")
 	public String logout(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		
-		//여기에 넣어야 함
+		// Spring Security의 SecurityContextLogoutHandler를 사용하여 로그아웃 처리
+	    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+	    if (auth != null) {
+	        new SecurityContextLogoutHandler().logout(request, response, auth);
+	    }
 		
 		return "redirect:/";
 	}
@@ -153,5 +175,4 @@ public class UserController {
 		
 		return "user/mypage";
 	}
-	
 }

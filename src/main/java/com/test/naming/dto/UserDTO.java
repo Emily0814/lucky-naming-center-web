@@ -12,12 +12,14 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 @Getter
 @Setter
 @AllArgsConstructor	//Lombok의 어노테이션이 작동하기 위해서는 모든 필드를 매개변수로 받는 생성자가 필요하기 때문에 필요함 
 @NoArgsConstructor	//기본 생성자 추가
 @Builder	
+@ToString(exclude = "profileFile")	//로깅 시 프로필 파일 제외
 public class UserDTO {
 
 	private Long id;
@@ -41,6 +43,11 @@ public class UserDTO {
         this.createdAt = LocalDateTime.now();
         this.status = 1;	//1:활성 상태, 0:비활성 상태
         this.roles = "ROLE_USER";
+        
+        //닉네임이 없으면 이메일에서 @ 앞부분 사용
+        if (this.nickname == null || this.nickname.isEmpty()) {
+            this.nickname = this.email.split("@")[0];
+        }
     }
 	
     //toEntity 메서드는 더 이상 필요하지 않을 수 있음(UserMapper가 있으으로)

@@ -15,12 +15,18 @@
 			  <li class="nav-item">
 			    <a class="nav-link" href="/about">ABOUT</a>
 			  </li>
-			  <li class="nav-item">
+			  <!-- 로그인한 사용자에게만 마이페이지 표시 -->
+			  <li class="nav-item" sec:authorize="isAuthenticated()">
 			    <a class="nav-link" href="/mypage">MYPAGE</a>
 			  </li>
-			  <li class="nav-item">
+			  <!-- 로그인하지 않은 사용자에게만 로그인 링크 표시 -->
+			  <li class="nav-item" sec:authorize="!isAuthenticated()">
 			    <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#login-modal">LOGIN</a>
 			  </li>
+			  <!-- 로그인한 사용자에게만 로그아웃 링크 표시 -->
+                <li class="nav-item" sec:authorize="isAuthenticated()">
+                    <a class="nav-link" href="/logout">LOGOUT</a>
+                </li>
 			</ul>
         </div>
         

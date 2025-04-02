@@ -119,20 +119,26 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
       }
       
-      // AJAX를 사용하여 회원가입 처리
+      // 사용자 정보 수집
       const email = document.getElementById('userEmail').value;
-      // FormData 객체를 사용하여 multipart/form-data 형식으로 전송
+      const nickname = document.getElementById('nickname').value || '';
+      
+      // FormData 객체 생성
       const formData = new FormData();
-	  
-      formData.append('userDTO', JSON.stringify({ 
-        email: email, 
-        password: password 
+      
+      // String 형태로 JSON 데이터 추가 (Blob 대신)
+      formData.append('userDTO', new Blob([JSON.stringify({
+        email: email,
+        password: password,
+        nickname: nickname
+      })], {
+        type: 'application/json'
       }));
       
-      // 실제 파일 업로드가 있다면 추가
-      const profileFile = document.getElementById('profile-file').files[0];
+      // 프로필 이미지 파일 추가 (있는 경우)
+      const profileFile = document.getElementById('confirm-profile').files[0];
       if (profileFile) {
-      	formData.append('profileFile', profileFile);
+        formData.append('profileFile', profileFile);
       }
       
       console.log('회원가입 시도:', email);
@@ -140,16 +146,19 @@ document.addEventListener('DOMContentLoaded', function() {
       // 서버로 FormData 전송
       fetch('/api/signup', {
         method: 'POST',
-        body: formData, // Content-Type은 자동으로 설정됨
+        body: formData
       })
       .then(response => {
         if (!response.ok) {
-          throw new Error('네트워크 응답이 올바르지 않습니다');
+          return response.json().then(data => {
+            throw new Error(data.message || '회원가입 처리 중 오류가 발생했습니다');
+          });
         }
         return response.json();
       })
       .then(data => {
-        if (data.success) {
+        console.log('회원가입 응답:', data);
+        if (data.success === "true") {
           alert('회원가입이 완료되었습니다. 로그인해주세요.');
           signupModal.hide();
           setTimeout(() => {
@@ -161,13 +170,10 @@ document.addEventListener('DOMContentLoaded', function() {
       })
       .catch(error => {
         console.error('회원가입 오류:', error);
-        // 실제 API가 없으므로 임시로 성공 처리하여 테스트
-        alert('회원가입이 완료되었습니다. 로그인해주세요. (테스트)');
-        signupModal.hide();
-        setTimeout(() => {
-          loginModal.show();
-        }, 300);
+        alert('회원가입 중 오류가 발생했습니다: ' + error.message);
       });
     });
   }
+     
+  
 });

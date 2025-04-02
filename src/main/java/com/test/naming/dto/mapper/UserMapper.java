@@ -1,5 +1,7 @@
 package com.test.naming.dto.mapper;
 
+import java.util.HashSet;
+
 import org.springframework.stereotype.Component;
 
 import com.test.naming.dto.UserDTO;
@@ -28,7 +30,12 @@ public class UserMapper {	//사용자 관련 엔티티-DTO 변환기
         
         //기본 역할을 "ROLE_USER"로 설정
         roleRepository.findByName("ROLE_USER")
-        	.ifPresent(role -> user.getRoles().add(role));
+        	.ifPresent(role -> {
+            if(user.getRoles() == null) {
+                user.setRoles(new HashSet<>());
+            }
+            user.getRoles().add(role);
+        });
         
         return user;
     }

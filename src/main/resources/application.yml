@@ -10,7 +10,10 @@ spring:
     url: jdbc:oracle:thin:@localhost:1521/XEPDB1
     username: namingcenter
     password: java1234
-
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
   jpa:
     hibernate:
       ddl-auto: update # 테이블 자동 생성 전략 (none, create, create-drop, update, validate)

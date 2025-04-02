@@ -13,6 +13,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -75,9 +76,20 @@ public class SecurityConfig {	//애플리케이션의 보안 정책을 구현 > 
             	}
             })
             .permitAll()
-        ); 
-	    //.csrf(csrf -> csrf.disable());  // API 호출을 위해 CSRF 비활성화 (테스트 환경에서만!)
+        )
+        	.csrf(csrf -> csrf
+            	.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                // API 엔드포인트에 대해 CSRF 보호 비활성화 (개발 중에만 사용)
+                .ignoringRequestMatchers("/api/**")
+            );
 	    
+	    http.logout(logout -> logout
+	            .logoutUrl("/logout")
+	            .logoutSuccessUrl("/")
+	            .invalidateHttpSession(true)
+	            .clearAuthentication(true)
+	            .deleteCookies("JSESSIONID")
+	        );
 	    
     return http.build();
 	}
