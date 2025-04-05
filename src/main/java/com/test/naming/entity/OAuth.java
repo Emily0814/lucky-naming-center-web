@@ -52,7 +52,7 @@ public class OAuth {	//소셜 로그인 사용자 정보를 저장(제공자(Goo
 	private LocalDateTime updateAt;
 	
 	@PrePersist
-	protected void onCreat() {
+	protected void onCreate() {
 		createdAt = LocalDateTime.now();
 		updateAt = LocalDateTime.now();
 	}

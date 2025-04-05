@@ -1,5 +1,7 @@
 package com.test.naming.service;
 
+import java.time.LocalDateTime;
+
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -8,6 +10,7 @@ import com.test.naming.dto.UserDTO;
 import com.test.naming.dto.mapper.UserMapper;
 import com.test.naming.entity.OAuth;
 import com.test.naming.entity.User;
+import com.test.naming.repository.OAuthRepository;
 import com.test.naming.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -20,6 +23,7 @@ public class UserService {
 	private final UserRepository userRepository;
 	private final UserMapper userMapper;
 	private final BCryptPasswordEncoder passwordEncoder;
+	private final OAuthRepository oAuthRepository;
 	
 	//사용자 저장(쓰기 작업이므로 readOnly = false)
 	@Transactional
@@ -75,7 +79,7 @@ public class UserService {
 	}
 	
 	@Transactional
-	public User registerOAuth2User(UserDTO userDTO) {
+	public User registerOAuth2User(UserDTO userDTO, String provider) {
 	    // 기본값 설정 (필요한 경우)
 	    if (userDTO.getStatus() == null) {
 	        userDTO.setStatus(1); // 활성 상태
@@ -84,8 +88,22 @@ public class UserService {
 	    // 소셜 로그인은 비밀번호가 실제로 사용되지 않지만, 데이터베이스 제약 조건을 위해 인코딩
 	    userDTO.setPassword(passwordEncoder.encode(userDTO.getPassword()));
 	    
-	 // 사용자 저장 - UserInfo 테이블에만 저장
+	    //사용자 저장
 	    User user = userMapper.toEntity(userDTO);
-	    return userRepository.save(user);
+	    User savedUser = userRepository.save(user);
+	    
+	    // OAuth 테이블에 정보 저장
+	    OAuth oAuth = OAuth.builder()
+	        .user(savedUser)
+	        .oauthEmail(userDTO.getEmail())
+	        .provider(provider)
+	        .createdAt(LocalDateTime.now())
+	        .updateAt(LocalDateTime.now())
+	        .build();
+	    
+	    oAuthRepository.save(oAuth);
+	    
+	    return savedUser;
+	    
 	}
 }
