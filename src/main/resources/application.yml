@@ -22,16 +22,7 @@ spring:
       hibernate:
         "[format_sql]": true # SQL 쿼리 로그 포맷팅 
         dialect: org.hibernate.dialect.OracleDialect # Oracle 12c+ 방언
-  security:
-    oauth2:
-      client:
-        registration:
-          google:
-            client-id: 1087672790120-mmcgdafbqhuhqejmqnjpa01nk3emu2cm.apps.googleusercontent.com
-            client-secret: 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
-            scope:
-              - email
-              - profile # ,로 구분해서 한 줄 배열할 수도 있음 but, 가독성이 조금 떨어질 수 있음
+
 file:
   upload:
      dir: src/main/resources/static/uploads
