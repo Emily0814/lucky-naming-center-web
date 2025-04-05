@@ -15,8 +15,12 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 
+import com.test.naming.security.oauth.CustomOAuth2UserService;
+import com.test.naming.security.oauth.OAuth2LoginSuccessHandler;
+
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 
 //1. 비밀번호 인코딩 방식 정의
 //2. URL 접근 권한 설정
@@ -26,12 +30,11 @@ import jakarta.servlet.http.HttpServletResponse;
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
 	
-    @Bean 
-    public BCryptPasswordEncoder bCryptPasswordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+    private final CustomOAuth2UserService customOAuth2UserService;
+    private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
     
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -85,6 +88,14 @@ public class SecurityConfig {
             // API 엔드포인트에 대해 CSRF 보호 비활성화 (개발 중에만 사용)
             .ignoringRequestMatchers("/api/**")
         );
+        
+        http.oauth2Login(oauth2 -> oauth2
+                .loginPage("/login-page")
+                .userInfoEndpoint(userInfo -> userInfo
+                        .userService(customOAuth2UserService)
+                )
+                .successHandler(oAuth2LoginSuccessHandler)
+            );
         
         http.logout(logout -> logout
                 .logoutUrl("/logout")
