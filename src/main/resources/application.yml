@@ -1,6 +1,9 @@
 spring:
   application:
     name: naming-center
+  profiles:
+    include:
+    - oauth
   thymeleaf:
     enabled: true
     prefix: classpath:/templates/
