@@ -9,6 +9,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -50,6 +51,7 @@ public class OAuth {	//소셜 로그인 사용자 정보를 저장(제공자(Goo
 	@Column(name = "UPDATE_AT", nullable = false)
 	private LocalDateTime updateAt;
 	
+	@PrePersist
 	protected void onCreat() {
 		createdAt = LocalDateTime.now();
 		updateAt = LocalDateTime.now();

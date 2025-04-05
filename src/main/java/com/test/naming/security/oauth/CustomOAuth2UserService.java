@@ -60,7 +60,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         
         if (user == null) {
             // 신규 사용자는 회원가입 처리
-            return userService.registerOAuth2User(attributes.toUserDTO());
+        	return userService.registerOAuth2User(attributes.toUserDTO());
         }
         
         // 기존 사용자는 정보 업데이트 (필요시)

@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.test.naming.dto.UserDTO;
 import com.test.naming.dto.mapper.UserMapper;
+import com.test.naming.entity.OAuth;
 import com.test.naming.entity.User;
 import com.test.naming.repository.UserRepository;
 
@@ -83,7 +84,7 @@ public class UserService {
 	    // 소셜 로그인은 비밀번호가 실제로 사용되지 않지만, 데이터베이스 제약 조건을 위해 인코딩
 	    userDTO.setPassword(passwordEncoder.encode(userDTO.getPassword()));
 	    
-	    // 사용자 저장
+	 // 사용자 저장 - UserInfo 테이블에만 저장
 	    User user = userMapper.toEntity(userDTO);
 	    return userRepository.save(user);
 	}

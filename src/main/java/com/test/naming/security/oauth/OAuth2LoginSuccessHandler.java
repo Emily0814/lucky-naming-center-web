@@ -27,6 +27,18 @@ public class OAuth2LoginSuccessHandler extends SavedRequestAwareAuthenticationSu
         }
         
         // 기본 성공 처리 (저장된 요청이 있으면 해당 URL로, 없으면 기본 URL로)
-        super.onAuthenticationSuccess(request, response, authentication);
+        //super.onAuthenticationSuccess(request, response, authentication); > 상위 클래스의 기본 성공 처리만 호출 > 아래 코드로 수정        
+        
+        //세션에 저장된 리다이렉트 URL이 있는지 확인
+        String redirectUrl = (String) request.getSession().getAttribute("REDIRECT_URL");
+        
+        if (redirectUrl != null) {
+            // 세션에서 리다이렉트 URL 제거
+            request.getSession().removeAttribute("REDIRECT_URL");
+            response.sendRedirect(redirectUrl);
+        } else {
+            // 기본 URL(홈 페이지)로 리다이렉트
+            response.sendRedirect("/");
+        }
     }
 }
