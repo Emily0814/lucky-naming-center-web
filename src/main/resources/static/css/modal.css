@@ -95,6 +95,11 @@
   width: 25px;
 }
 
+#btn-google a {
+  text-decoration: none;
+  color: black;
+}
+
 .member-registration {
 	display: flex;
 	align-items: center;

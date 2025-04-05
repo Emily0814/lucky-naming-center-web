@@ -6,6 +6,7 @@ import java.util.Set;
 
 import com.test.naming.dto.UserDTO;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -60,7 +61,7 @@ public class User {	//사용자 정보를 저장(사용자 이름, 이메일, �
     @Column(name = "PROFILE", length=300)
     private String profile;
 	
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
         name = "USER_ROLE",
         joinColumns = @JoinColumn(name = "USER_ID"),
