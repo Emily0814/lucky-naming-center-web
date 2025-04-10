@@ -1,10 +1,215 @@
 <!DOCTYPE html>
-<html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/default}">
 <head>
-<meta charset="UTF-8">
-<title>Insert title here</title>
+    <title>mypage</title>
 </head>
 <body>
-
+    <div layout:fragment="content">
+        <div class="mypage-container">
+            <!-- 사용자 프로필 섹션 -->
+            <div class="profile-section">
+                <div class="profile-header">
+                    <h2>내 프로필</h2>
+                    <button class="btn btn-sm btn-outline-secondary edit-profile-btn">
+                        <i class="fas fa-edit"></i> 프로필 수정
+                    </button>
+                </div>
+                
+                <div class="profile-content">
+                    <div class="profile-image-container">
+                        <img th:src="${user.profileImageUrl != null ? user.profileImageUrl : '/images/default-profile.svg'}" 
+                             alt="프로필 이미지" class="profile-image">
+                    </div>
+                    <div class="profile-info">
+                        <div class="info-item">
+                            <span class="info-label">닉네임</span>
+                            <span class="info-value" th:text="${user.nickname != null ? user.nickname : '닉네임 미설정'}">닉네임</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">이메일</span>
+                            <span class="info-value" th:text="${user.email}">user@example.com</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">가입일</span>
+                            <span class="info-value" th:text="${#temporals.format(user.createdAt, 'yyyy-MM-dd')}">2023-01-01</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 내가 만든 이름 목록 섹션 -->
+            <div class="my-names-section">
+                <div class="section-header">
+                    <h2>내가 만든 이름</h2>
+                </div>
+                
+                <div class="names-list" th:if="${!#lists.isEmpty(namesList)}">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>이름</th>
+                                <th>의미</th>
+                                <th>생성일</th>
+                                <th>액션</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="name : ${namesList}">
+                                <td th:text="${name.nameValue}">홍길동</td>
+                                <td th:text="${name.meaning}">의미 있는 이름</td>
+                                <td th:text="${#temporals.format(name.createdAt, 'yyyy-MM-dd')}">2023-01-01</td>
+                                <td>
+                                    <button class="btn btn-sm btn-info view-name-btn" th:data-id="${name.id}">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-danger delete-name-btn" th:data-id="${name.id}">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="empty-state" th:if="${#lists.isEmpty(namesList)}">
+                    <div class="empty-icon">
+                        <i class="fas fa-file-alt fa-3x"></i>
+                    </div>
+                    <p>아직 생성한 이름이 없습니다.</p>
+                    <a href="/generator" class="btn btn-primary">이름 만들기</a>
+                </div>
+                
+                <!-- 페이지네이션 -->
+                <div class="pagination-container" th:if="${namesList != null && namesList.size() > 0}">
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination justify-content-center">
+                            <li class="page-item" th:classappend="${currentPage == 0 ? 'disabled' : ''}">
+                                <a class="page-link" th:href="@{/mypage(page=${currentPage - 1})}" aria-label="Previous">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+                            <li class="page-item" th:each="pageNumber : ${#numbers.sequence(0, totalPages - 1)}" 
+                                th:classappend="${pageNumber == currentPage ? 'active' : ''}">
+                                <a class="page-link" th:href="@{/mypage(page=${pageNumber})}" th:text="${pageNumber + 1}">1</a>
+                            </li>
+                            <li class="page-item" th:classappend="${currentPage == totalPages - 1 ? 'disabled' : ''}">
+                                <a class="page-link" th:href="@{/mypage(page=${currentPage + 1})}" aria-label="Next">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+            
+            <!-- 프로필 수정 모달 -->
+            <div class="modal fade" id="edit-profile-modal" tabindex="-1" aria-labelledby="editProfileModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="editProfileModalLabel">프로필 수정</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form id="edit-profile-form" method="POST" enctype="multipart/form-data">
+                                <!-- 프로필 이미지 업로드 -->
+                                <div class="mb-3" id="profile-container">
+                                    <label for="profile-upload" class="form-label">프로필 이미지</label>
+                                    <div class="profile-upload-container">
+                                        <input type="file" id="profile-upload" name="profileImage" class="file-input" accept="image/*">
+                                        <label for="profile-upload" class="profile-upload-label">
+                                            <img th:src="${user.profileImageUrl != null ? user.profileImageUrl : '/images/default-profile.svg'}" 
+                                                alt="프로필" class="profile-image" id="edit-profile-image">
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                                <!-- 닉네임 변경 -->
+                                <div class="mb-3">
+                                    <label for="edit-nickname" class="form-label">닉네임</label>
+                                    <input type="text" class="form-control" id="edit-nickname" name="nickname" 
+                                        th:value="${user.nickname}">
+                                </div>
+                                
+                                <!-- 비밀번호 변경 (선택적) -->
+                                <div class="mb-3">
+                                    <label for="edit-password" class="form-label">새 비밀번호 (변경하려면 입력)</label>
+                                    <div class="input-with-button">
+                                        <input type="password" class="form-control" id="edit-password" name="password" 
+                                            placeholder="8자 이상 영문 대소문자, 숫자, 특수문자를 조합">
+                                        <button type="button" class="btn-toggle-pw" id="toggle-edit-password">
+                                            <i class="fa fa-eye" id="eye-edit-icon"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="confirm-edit-password" class="form-label">새 비밀번호 확인</label>
+                                    <div class="input-with-button">
+                                        <input type="password" class="form-control" id="confirm-edit-password" name="confirmPassword" 
+                                            placeholder="비밀번호 확인">
+                                        <button type="button" class="btn-toggle-pw" id="toggle-confirm-edit-password">
+                                            <i class="fa fa-eye" id="eye-confirm-edit-icon"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                                
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <button type="submit" class="btn btn-primary">저장하기</button>
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 이름 상세 보기 모달 -->
+            <div class="modal fade" id="view-name-modal" tabindex="-1" aria-labelledby="viewNameModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="viewNameModalLabel">이름 상세 정보</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div id="name-details-container">
+                                <!-- 이름 상세 정보가 여기에 동적으로 로드됩니다 -->
+                                <div class="name-detail-header">
+                                    <h3 id="detail-name-value">이름</h3>
+                                    <span class="badge bg-secondary" id="detail-created-date">2023-01-01</span>
+                                </div>
+                                
+                                <div class="name-meaning-section">
+                                    <h4>이름의 의미</h4>
+                                    <p id="detail-name-meaning">의미 설명...</p>
+                                </div>
+                                
+                                <div class="name-characters-section">
+                                    <h4>글자별 의미</h4>
+                                    <div id="detail-characters-container">
+                                        <!-- 글자별 의미가 여기에 동적으로 추가됩니다 -->
+                                    </div>
+                                </div>
+                                
+                                <div class="name-notes-section">
+                                    <h4>메모</h4>
+                                    <p id="detail-name-notes">메모 내용...</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+                            <a href="#" id="detail-edit-link" class="btn btn-primary">수정하기</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

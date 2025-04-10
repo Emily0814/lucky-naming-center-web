@@ -42,8 +42,8 @@ public class SecurityConfig {
         //허가 URL
         http.authorizeHttpRequests(auth -> auth
             .requestMatchers("/mypage").hasAnyRole("USER", "ADMIN")
-            .requestMatchers("/", "/index", "/signup", "/login", "/signup-page", "/login-page", "/api/**").permitAll()
-            .requestMatchers("/css/**", "/js/**", "/images/**", "/uploads/**").permitAll() // 모든 정적 리소스 허용
+            .requestMatchers("/", "/index", "/signup", "/login", "/signup-page", "/login-page", "/api/**", "/generator", "/process", "/about").permitAll()
+            .requestMatchers("/css/**", "/js/**", "/images/**", "/uploads/**", "/error/**").permitAll() // 모든 정적 리소스 허용
             .anyRequest().authenticated()
         )
         .exceptionHandling(exception -> exception
@@ -62,6 +62,8 @@ public class SecurityConfig {
                         }
                     }
                 })
+                //추가: 403 접근 거부 처리
+                .accessDeniedPage("/error/403")
             )
         .formLogin(form -> form
             .loginPage("/login-page") // 로그인 페이지 URL

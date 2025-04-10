@@ -1,10 +1,23 @@
 <!DOCTYPE html>
-<html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/default}">
 <head>
-<meta charset="UTF-8">
-<title>Insert title here</title>
+    <title>서버 오류 - 500</title>
 </head>
 <body>
-
+    <div layout:fragment="content">
+        <div class="error-container">
+            <div class="error-status">500</div>
+            <div class="error-title">서버 오류가 발생했습니다</div>
+            <div class="error-message">
+                <p>요청을 처리하는 중에 예기치 않은 오류가 발생했습니다.</p>
+                <p>잠시 후 다시 시도해 주세요.</p>
+            </div>
+            <div class="error-actions">
+                <a href="/" class="btn btn-primary">홈으로 돌아가기</a>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

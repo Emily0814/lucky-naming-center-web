@@ -1,10 +1,12 @@
 package com.test.naming.controller;
 
+import java.util.ArrayList;
 import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -140,21 +142,41 @@ public class UserController {
 	}
 	
 	@GetMapping("/mypage")
+	@PreAuthorize("isAuthenticated()")
 	public String mypage(Model model, Authentication authentication) {
 		model.addAttribute("pageName", "mypage"); // mypage.html에 적용될 CSS 파일명
 		
-		// 현재 인증된 사용자 정보 가져오기
-        if (authentication != null && authentication.isAuthenticated()) {
-            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-            String email = userDetails.getUsername(); // 이메일이 username으로 사용됨
-            
-            // 이메일로 사용자 정보 조회
-            UserDTO userDTO = userService.findUserByEmail(email);
-            if (userDTO != null) {
-                model.addAttribute("user", userDTO);
-            }
-        }
-		
-		return "user/mypage";
+		// 현재 인증된 사용자가 있는지 명시적으로 체크
+	    if (authentication == null || !authentication.isAuthenticated()) {
+	        return "redirect:/?needLogin=true&redirectUrl=/mypage";
+	    }
+	    
+	    try {
+	        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+	        String email = userDetails.getUsername();
+	        
+	        // 로그 추가
+	        System.out.println("로그인 사용자: " + email);
+	        System.out.println("권한: " + userDetails.getAuthorities());
+	        
+	        // 이메일로 사용자 정보 조회
+	        UserDTO userDTO = userService.findUserByEmail(email);
+	        if (userDTO != null) {
+	            model.addAttribute("user", userDTO);
+	            
+	            // 임시 데이터 (실제로는 데이터베이스에서 가져오는 코드로 대체)
+	            model.addAttribute("namesList", new ArrayList<>());
+	            model.addAttribute("currentPage", 0);
+	            model.addAttribute("totalPages", 1);
+	        } else {
+	            System.out.println("사용자 정보를 찾을 수 없음: " + email);
+	            return "redirect:/";
+	        }
+	        
+	        return "user/mypage";
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        return "redirect:/";
+	    }
 	}
 }
