@@ -25,57 +25,19 @@ document.addEventListener('DOMContentLoaded', function() {
           localStorage.setItem('accessToken', jwtToken);
         }
         
-        // 즉시 UI 업데이트 (사용자 경험 향상)
-        updateAuthUI(true);
+        console.log('로그인 성공 - URL에서 파라미터 제거 및 페이지 새로고침');
         
-        // URL에서 파라미터 제거하고 페이지 새로고침
+        // URL에서 파라미터 제거
         const cleanUrl = window.location.pathname;
         
-        // 지연시간을 주어 토큰이 브라우저에 저장되도록 함
-        setTimeout(() => {
-          window.location.href = cleanUrl; // 페이지 강제 새로고침
-        }, 500);
+        // 짧은 지연 후 페이지 새로고침 (토큰이 저장되도록)
+        setTimeout(function() {
+          window.location.href = cleanUrl;
+        }, 100);
+      } else {
+        console.log('JWT 토큰을 찾을 수 없음');
       }
     }
-  }
-  
-  // UI 업데이트 함수
-  function updateAuthUI(isLoggedIn) {
-    console.log('UI 업데이트 중: 로그인 상태 =', isLoggedIn);
-    
-    // 로그인/로그아웃 상태에 따라 요소 표시/숨김
-    document.querySelectorAll('.auth-hide-logged-in').forEach(el => {
-      el.style.display = isLoggedIn ? 'none' : '';
-    });
-    
-    document.querySelectorAll('.auth-hide-logged-out').forEach(el => {
-      el.style.display = isLoggedIn ? '' : 'none';
-    });
-  }
-  
-  // 인증 상태 확인 및 UI 업데이트
-  function checkAuthAndUpdateUI() {
-    // JWT 토큰이 있는지 확인
-    let isLoggedIn = false;
-    
-    // 인증 상태 확인 방법 1: authService 사용
-    if (window.authService && window.authService.isAuthenticated()) {
-      isLoggedIn = true;
-    } 
-    // 인증 상태 확인 방법 2: 로컬 스토리지 확인
-    else if (localStorage.getItem('accessToken')) {
-      isLoggedIn = true;
-    }
-    // 인증 상태 확인 방법 3: 쿠키 확인
-    else {
-      const value = `; ${document.cookie}`;
-      const parts = value.split(`; jwt_token=`);
-      if (parts.length === 2 && parts.pop().split(';').shift()) {
-        isLoggedIn = true;
-      }
-    }
-    
-    updateAuthUI(isLoggedIn);
   }
   
   // 로그인 폼 처리
@@ -113,9 +75,6 @@ document.addEventListener('DOMContentLoaded', function() {
           }
         }
         
-        // UI 업데이트
-        updateAuthUI(true);
-        
         // 리다이렉트 URL 확인
         const redirectUrl = document.getElementById('redirect-url')?.value || 
                           sessionStorage.getItem('redirectUrl') || '/';
@@ -144,9 +103,6 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
   }
-  
-  // 인증 상태 확인 및 UI 업데이트
-  checkAuthAndUpdateUI();
   
   // OAuth2 로그인 성공 감지
   handleOAuth2LoginSuccess();

@@ -16,6 +16,8 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 
+import jakarta.annotation.PostConstruct;
+import java.nio.charset.StandardCharsets;
 import java.security.Key;
 
 @Service
@@ -26,6 +28,14 @@ public class JwtService {
     
     @Value("${jwt.expiration}")
     private long jwtExpiration;
+    
+    // 서명 키를 한 번만 생성하도록 변경
+    private Key signingKey;
+    
+    @PostConstruct
+    public void init() {
+        this.signingKey = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
+    }
     
     public String generateToken(CustomOAuth2User user) {
         Map<String, Object> claims = new HashMap<>();
@@ -48,14 +58,12 @@ public class JwtService {
                 .setSubject(subject)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + jwtExpiration))
-                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                .signWith(signingKey, SignatureAlgorithm.HS256)
                 .compact();
     }
     
     private Key getSigningKey() {
-        //byte[] keyBytes = Decoders.BASE64.decode(secretKey);
-        //return Keys.hmacShaKeyFor(keyBytes);
-    	return Keys.secretKeyFor(SignatureAlgorithm.HS256);
+        return signingKey;
     }
     
     public String extractUsername(String token) {

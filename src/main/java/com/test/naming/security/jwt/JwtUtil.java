@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
+import jakarta.annotation.PostConstruct;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
@@ -34,6 +35,15 @@ public class JwtUtil {
 
     @Value("${jwt.refresh-expiration:604800000}") // 7일 (밀리초 단위)
     private long refreshExpiration;
+    
+    // 서명 키를 한 번만 생성하도록 변경
+    private Key signingKey;
+    
+    @PostConstruct
+    public void init() {
+        log.info("JwtUtil 초기화: 서명 키 생성");
+        this.signingKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+    }
 
     // JWT 토큰에서 사용자 이름 추출
     public String extractUsername(String token) {
@@ -54,7 +64,7 @@ public class JwtUtil {
     // JWT 토큰에서 모든 클레임 추출
     private Claims extractAllClaims(String token) {
         return Jwts.parserBuilder()
-                .setSigningKey(getSigningKey())
+                .setSigningKey(signingKey)
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
@@ -67,12 +77,6 @@ public class JwtUtil {
         } catch (Exception e) {
             return true;
         }
-    }
-
-    // 서명 키 생성
-    private Key getSigningKey() {
-        byte[] keyBytes = secret.getBytes(StandardCharsets.UTF_8);
-        return Keys.hmacShaKeyFor(keyBytes);
     }
 
     // 액세스 토큰 생성
@@ -93,7 +97,7 @@ public class JwtUtil {
                 .setSubject(subject)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + expiration))
-                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                .signWith(signingKey, SignatureAlgorithm.HS256)
                 .compact();
     }
 

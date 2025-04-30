@@ -77,6 +77,20 @@ document.addEventListener('DOMContentLoaded', function() {
         document.dispatchEvent(new CustomEvent('auth:logout'));
         return null;
       }
+    },
+    
+    // 사용자 정보 가져오기
+    async getUserInfo() {
+      try {
+        const response = await fetchWithAuth('/api/auth/me');
+        if (!response.ok) {
+          throw new Error('사용자 정보를 가져오는데 실패했습니다.');
+        }
+        return await response.json();
+      } catch (error) {
+        console.error('사용자 정보 로드 오류:', error);
+        return null;
+      }
     }
   };
   
@@ -143,4 +157,40 @@ document.addEventListener('DOMContentLoaded', function() {
       // 로그아웃 성공 시 홈페이지로 리디렉션됨
     });
   }
+  
+  // 서버 측 인증 상태와 클라이언트 측 인증 상태가 다른 경우 확인
+  async function validateAuthentication() {
+    try {
+      // 클라이언트 측에서 인증되었다고 판단
+      if (authService.isAuthenticated()) {
+        // 서버에 인증 상태 확인 요청
+        const response = await fetch('/api/auth/me', {
+          headers: {
+            'Authorization': `Bearer ${authService.getAccessToken() || ''}`
+          }
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          // 서버에서도 인증되지 않았으면 로컬 토큰 삭제
+          if (!data.authenticated) {
+            console.log('서버 측 인증 실패, 로컬 토큰 삭제');
+            authService.clearTokens();
+            // 인증이 필요한 페이지면 로그인 페이지로 리디렉션
+            if (requiresAuth) {
+              window.location.href = '/?needLogin=true&redirectUrl=' + encodeURIComponent(window.location.pathname);
+            } else {
+              // 페이지 새로고침하여 서버 측 템플릿 렌더링 반영
+              window.location.reload();
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.error('인증 상태 검증 오류:', error);
+    }
+  }
+  
+  // 페이지 로드 시 인증 상태 확인
+  validateAuthentication();
 });

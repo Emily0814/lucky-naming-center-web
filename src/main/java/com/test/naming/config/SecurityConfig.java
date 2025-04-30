@@ -2,6 +2,7 @@ package com.test.naming.config;
 
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.time.LocalDateTime;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,6 +15,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
@@ -21,11 +23,17 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 
+import com.test.naming.entity.Token;
+import com.test.naming.entity.User;
+import com.test.naming.repository.TokenRepository;
+import com.test.naming.repository.UserRepository;
 import com.test.naming.security.jwt.JwtAuthenticationFilter;
+import com.test.naming.security.jwt.JwtUtil;
 import com.test.naming.security.oauth.CustomOAuth2UserService;
 import com.test.naming.security.oauth.OAuth2LoginSuccessHandler;
 import com.test.naming.security.service.CustomUserDetailsService;
 
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -40,6 +48,9 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final CustomUserDetailsService customUserDetailsService; // UserService 대신 CustomUserDetailsService 사용
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    private final UserRepository userRepository;
+    private final TokenRepository tokenRepository;
+    private final JwtUtil jwtUtil;
     
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -80,12 +91,47 @@ public class SecurityConfig {
             .successHandler(new AuthenticationSuccessHandler() {
                 public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
                         Authentication authentication) throws IOException {
+                    // 사용자 정보 가져오기
+                    UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+                    User user = userRepository.findByEmail(userDetails.getUsername());
+                    
+                    if (user == null) {
+                        response.sendRedirect("/?error=true&message=사용자를 찾을 수 없습니다");
+                        return;
+                    }
+                    
+                    // JWT 토큰 생성
+                    String accessToken = jwtUtil.generateToken(userDetails);
+                    String refreshToken = jwtUtil.generateRefreshToken(userDetails);
+                    
+                    // 토큰 DB에 저장 - 기존 토큰이 있으면 삭제 후 저장
+                    tokenRepository.deleteByUser(user);
+                    
+                    Token token = Token.builder()
+                            .user(user)
+                            .accessToken(accessToken)
+                            .refreshToken(refreshToken)
+                            .expiresAt(LocalDateTime.now().plusHours(24))
+                            .createdAt(LocalDateTime.now())
+                            .build();
+                    tokenRepository.save(token);
+                    
+                    // 응답 헤더에 JWT 토큰 추가
+                    response.addHeader("Authorization", "Bearer " + accessToken);
+                    
+                    // 쿠키에 JWT 토큰 저장 (클라이언트에서 접근 가능하도록)
+                    Cookie cookie = new Cookie("jwt_token", accessToken);
+                    cookie.setPath("/");
+                    cookie.setHttpOnly(false); // 자바스크립트에서 접근 가능하도록
+                    cookie.setMaxAge(3600); // 1시간
+                    response.addCookie(cookie);
+                    
                     // 세션이나 요청에서 리다이렉트로 URL 확인
                     String redirectUrl = request.getParameter("redirect");
                     if (redirectUrl == null || redirectUrl.isEmpty()) {
-                        response.sendRedirect("/");
+                        response.sendRedirect("/?login_success=true");
                     } else {
-                        response.sendRedirect(redirectUrl);
+                        response.sendRedirect(redirectUrl + "?login_success=true");
                     }
                 }
             })
