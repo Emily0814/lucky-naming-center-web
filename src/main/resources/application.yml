@@ -26,6 +26,12 @@ spring:
         "[format_sql]": true # SQL 쿼리 로그 포맷팅 
         dialect: org.hibernate.dialect.OracleDialect # Oracle 12c+ 방언
 
+# JWT 설정 추가
+jwt:
+   secret: ThisIsASecretKeyForJWTAuthentication123!@#$%^&*
+   expiration: 86400000  # 24시간 (밀리초 단위)
+   refresh-expiration: 604800000  # 7일 (밀리초 단위)
+
 file:
   upload:
      dir: src/main/resources/static/uploads

@@ -5,28 +5,30 @@ import java.net.URLEncoder;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 
+import com.test.naming.security.jwt.JwtAuthenticationFilter;
 import com.test.naming.security.oauth.CustomOAuth2UserService;
 import com.test.naming.security.oauth.OAuth2LoginSuccessHandler;
+import com.test.naming.security.service.CustomUserDetailsService;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-
-//1. 비밀번호 인코딩 방식 정의
-//2. URL 접근 권한 설정
-//3. 로그인/로그아웃 처리 설정
-//4. CSRF 보호 설정
-//5. 세션 관리 등의 보안 기능 정의
 
 @Configuration
 @EnableWebSecurity
@@ -35,12 +37,16 @@ public class SecurityConfig {
 	
     private final CustomOAuth2UserService customOAuth2UserService;
     private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final CustomUserDetailsService customUserDetailsService; // UserService 대신 CustomUserDetailsService 사용
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
     
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         
         //허가 URL
         http.authorizeHttpRequests(auth -> auth
+            .requestMatchers("/api/auth/**").permitAll() // JWT 인증 관련 엔드포인트 허용
             .requestMatchers("/mypage").hasAnyRole("USER", "ADMIN")
             .requestMatchers("/", "/index", "/signup", "/login", "/signup-page", "/login-page", "/api/**", "/generator", "/process", "/about").permitAll()
             .requestMatchers("/css/**", "/js/**", "/images/**", "/uploads/**", "/error/**").permitAll() // 모든 정적 리소스 허용
@@ -87,7 +93,7 @@ public class SecurityConfig {
         )
         .csrf(csrf -> csrf
             .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-            // API 엔드포인트에 대해 CSRF 보호 비활성화 (개발 중에만 사용)
+            // API 엔드포인트에 대해 CSRF 보호 비활성화
             .ignoringRequestMatchers("/api/**")
         );
         
@@ -106,7 +112,28 @@ public class SecurityConfig {
                 .clearAuthentication(true)
                 .deleteCookies("JSESSIONID")
             );
+
+        // JWT 인증을 위한 설정 추가
+        http.sessionManagement(session -> session
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            );
+        
+        // JWT 인증 필터 추가
+        http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         
         return http.build();
+    }
+    
+    @Bean
+    public AuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+        authProvider.setUserDetailsService(customUserDetailsService); // CustomUserDetailsService 사용
+        authProvider.setPasswordEncoder(bCryptPasswordEncoder);
+        return authProvider;
+    }
+    
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+        return config.getAuthenticationManager();
     }
 }

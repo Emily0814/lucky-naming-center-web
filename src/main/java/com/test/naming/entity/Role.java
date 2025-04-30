@@ -38,5 +38,6 @@ public class Role {	//사용자 권한 정보를 저장(역할 이름과 설명 
 	private String name;
 	
 	@ManyToMany(mappedBy = "roles")
+	@Builder.Default	//이 부분에서 users = new HashSet()로 초기화되고 있지만, @Builder 어노테이션은 이 초기화를 무시함 > Builder를 통해 객체를 생성할 때 users 필드는 기본값인 null로 설정 > 이처럼 @Builder.Default 어노테이션 추가하거나 final로 선언
 	private Set<User> users = new HashSet<>();
 }

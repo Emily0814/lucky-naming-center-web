@@ -78,7 +78,7 @@ public class User {	//사용자 정보를 저장(사용자 이름, 이메일, �
     public UserDTO toDTO() {
     	String roleString = this.roles.isEmpty() ? "" : this.roles.iterator().next().getName();
     	
-        return UserDTO.builder()
+        return UserDTO.builder() 
             .id(this.id)
             .nickname(this.nickname)
             .email(this.email)
